@@ -1,0 +1,12 @@
+{
+    "require": {
+        "aws/aws-sdk-php": "2.*",
+        "nicklasos/router": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "Fallback": "src/"
+        },
+        "files": ["src/functions.php"]
+    }
+}
