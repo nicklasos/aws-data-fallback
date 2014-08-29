@@ -13,5 +13,6 @@ $app->restore(function ($row) {
 
     // save data
 
-    return false; // if true - mark row as deleted
+    echo ".";
+    return 'restored'; // delete or restored
 });

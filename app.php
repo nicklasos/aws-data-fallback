@@ -24,8 +24,8 @@ $app->getContent(function () {
     $data = file_get_contents('php://input');
 
     return [
-        'json' => $data,
-        'userId' => $_GET['id']
+        'Json' => $data,
+        'UserId' => $_GET['id']
     ];
 });
 

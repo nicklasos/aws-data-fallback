@@ -2,6 +2,9 @@
 namespace Fallback;
 
 use Aws\DynamoDb\DynamoDbClient;
+use Aws\DynamoDb\Enum\Type;
+use Aws\DynamoDb\Enum\AttributeAction;
+//use Aws\DynamoDb\Enum\ReturnValue;
 
 class Dynamo
 {
@@ -39,38 +42,49 @@ class Dynamo
         ];
     }
 
-    public function initDB()
+    public function scanNotRestored()
     {
-        return $this->client->createTable([
+        return $this->client->getIterator(
+            'Scan',
+            [
+                'TableName' => $this->table,
+                'ScanFilter' => [
+                    'Restored' => [
+                        'AttributeValueList' => [
+                            [Type::NUMBER => 0]
+                        ],
+                        'ComparisonOperator' => 'EQ'
+                    ]
+                ]
+            ],
+            ['limit' => 1]
+        );
+    }
+
+    public function delete($item)
+    {
+        $this->client->deleteItem(array(
             'TableName' => $this->table,
-            'AttributeDefinitions' => [
-                [
-                    'AttributeName' => 'id',
-                    'AttributeType' => 'S'
-                ],
-                [
-                    'AttributeName' => 'time',
-                    'AttributeType' => 'N'
-                ],
-                [
-                    'AttributeName' => 'restored',
-                    'AttributeType' => 'N'
-                ]
-            ],
-            'KeySchema' => [
-                [
-                    'AttributeName' => 'id',
-                    'KeyType'       => 'HASH'
-                ],
-                [
-                    'AttributeName' => 'time',
-                    'KeyType'       => 'RANGE'
-                ]
-            ],
-            'ProvisionedThroughput' => [
-                'ReadCapacityUnits'  => 10,
-                'WriteCapacityUnits' => 20
+            'Key' => [
+                'Id'   => [Type::STRING => $item['Id']['S']],
             ]
+        ));
+    }
+
+    public function restore($item)
+    {
+        $this->client->updateItem([
+            "TableName" => $this->table,
+            "Key" => [
+                "Id" => [Type::STRING => $item["Id"]["S"]]
+            ],
+            "AttributeUpdates" => [
+                "Restored" => [
+                    "Action" => AttributeAction::PUT,
+                    "Value" => [Type::NUMBER => 1]
+                ]
+            ],
+            // "ReturnValues" => ReturnValue::ALL_NEW
         ]);
     }
 }

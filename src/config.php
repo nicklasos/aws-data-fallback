@@ -6,5 +6,6 @@ return [
         'region' => 'us-west-2',
         'table' => 'data' // table to store data
     ],
-    'save-url' => 'save/:id'
+    'save-url' => 'user/:id',
+    'stats-url' => 'stats'
 ];

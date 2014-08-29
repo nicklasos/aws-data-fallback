@@ -63,12 +63,10 @@ class Application
             }
         });
 
-        /*
         $router->get($this->config['stats-url'], function () {
             header('Content-Type: application/json');
             return json_encode($this->dynamo->getStats());
         });
-        */
 
         $on404 = $this->on404;
         $router->notFound($on404);
@@ -76,9 +74,22 @@ class Application
         $router->run();
     }
 
-    public function restore()
+    public function restore(callable $restore)
     {
+        $iterator = $this->dynamo->scanNotRestored();
 
+
+        foreach ($iterator as $item) {
+            $result = $restore($item);
+
+            if ($result === 'delete') {
+                $this->dynamo->delete($item);
+            }
+
+            if ($result === 'restored') {
+                $this->dynamo->restore($item);
+            }
+        }
     }
 
     /**
@@ -89,9 +100,10 @@ class Application
     private function addAttributes($content)
     {
         $getId           = $this->getId;
-        $content['ip']   = get_client_ip();
-        $content['id']   = $getId();
-        $content['time'] = time();
+        $content['Id']   = $getId();
+        $content['Ip']   = get_client_ip();
+        $content['Time'] = time();
+        $content['Restored'] = 0;
 
         return $content;
     }
